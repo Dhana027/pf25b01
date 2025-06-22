@@ -11,8 +11,8 @@ public class MySqlExample {
         host = "mysql-tictactoe-testingnewdb246.c.aivencloud.com";
         port = "18905";
         databaseName = "tictactoedb";
-        userName = "avnadmin";
-        password = "AVNS_COh1hjLV6lNYpkPqMZx";
+        userName = "";
+        password = "";
 //        for (int i = 0; i < args.length - 1; i++) {
 //            switch (args[i].toLowerCase(Locale.ROOT)) {
 //                case "-host": host = args[++i]; break;
