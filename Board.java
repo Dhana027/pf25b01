@@ -4,11 +4,12 @@ import java.awt.*;
  */
 public class Board {
     // Define named constants
-    public static final int ROWS = 3;  // ROWS x COLS cells
-    public static final int COLS = 3;
+    public static final int ROWS = 5;  // ROWS x COLS cells
+    public static final int COLS = 5;
     // Define named constants for drawing
     public static final int CANVAS_WIDTH = Cell.SIZE * COLS;  // the drawing canvas
     public static final int CANVAS_HEIGHT = Cell.SIZE * ROWS;
+    public static final Color COLOR_BG = new Color(40, 40, 40);
     public static final int GRID_WIDTH = 8;  // Grid-line's width
     public static final int GRID_WIDTH_HALF = GRID_WIDTH / 2; // Grid-line's half-width
     public static final Color COLOR_GRID = Color.LIGHT_GRAY;  // grid lines
@@ -57,17 +58,25 @@ public class Board {
         if (cells[selectedRow][0].content == player  // 3-in-the-row
                 && cells[selectedRow][1].content == player
                 && cells[selectedRow][2].content == player
+                && cells[selectedRow][3].content == player
+                && cells[selectedRow][4].content == player
                 || cells[0][selectedCol].content == player // 3-in-the-column
                 && cells[1][selectedCol].content == player
                 && cells[2][selectedCol].content == player
+                && cells[3][selectedCol].content == player
+                && cells[4][selectedCol].content == player
                 || selectedRow == selectedCol     // 3-in-the-diagonal
                 && cells[0][0].content == player
                 && cells[1][1].content == player
                 && cells[2][2].content == player
+                && cells[3][3].content == player
+                && cells[4][4].content == player
                 || selectedRow + selectedCol == 2 // 3-in-the-opposite-diagonal
                 && cells[0][2].content == player
                 && cells[1][1].content == player
-                && cells[2][0].content == player) {
+                && cells[2][0].content == player
+                && cells[2][2].content == player
+                && cells[3][0].content == player) {
             return (player == Seed.CROSS) ? State.CROSS_WON : State.NOUGHT_WON;
         } else {
             // Nobody win. Check for DRAW (all cells occupied) or PLAYING.
@@ -84,7 +93,11 @@ public class Board {
 
     /** Paint itself on the graphics canvas, given the Graphics context */
     public void paint(Graphics g) {
-        // Draw the grid-lines
+        // Draw the background first
+        g.setColor(COLOR_BG);  // use dark gray background
+        g.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        // Draw the grid lines
         g.setColor(COLOR_GRID);
         for (int row = 1; row < ROWS; ++row) {
             g.fillRoundRect(0, Cell.SIZE * row - GRID_WIDTH_HALF,
@@ -97,10 +110,10 @@ public class Board {
                     GRID_WIDTH, GRID_WIDTH);
         }
 
-        // Draw all the cells
+        // Draw the content of each cell
         for (int row = 0; row < ROWS; ++row) {
             for (int col = 0; col < COLS; ++col) {
-                cells[row][col].paint(g);  // ask the cell to paint itself
+                cells[row][col].paint(g);  // ask the cell to draw itself
             }
         }
     }

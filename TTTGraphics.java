@@ -8,8 +8,8 @@ public class TTTGraphics extends JFrame {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
 
     // Define named constants for the game board
-    public static final int ROWS = 3;  // ROWS x COLS cells
-    public static final int COLS = 3;
+    public static final int ROWS = 4;  // ROWS x COLS cells
+    public static final int COLS = 4;
 
     // Define named constants for the drawing graphics
     public static final int CELL_SIZE = 120; // cell width/height (square)
@@ -21,9 +21,9 @@ public class TTTGraphics extends JFrame {
     public static final int CELL_PADDING = CELL_SIZE / 5;
     public static final int SYMBOL_SIZE = CELL_SIZE - CELL_PADDING * 2; // width/height
     public static final int SYMBOL_STROKE_WIDTH = 8; // pen's stroke width
-    public static final Color COLOR_BG = Color.WHITE;  // background
-    public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
-    public static final Color COLOR_GRID   = Color.LIGHT_GRAY;  // grid lines
+    public static final Color COLOR_BG = new Color(40, 40, 40);  // background
+    public static final Color COLOR_BG_STATUS = new Color(40, 40, 40);
+    public static final Color COLOR_GRID = new Color(80, 80, 80);  // grid lines
     public static final Color COLOR_CROSS  = new Color(211, 45, 65);  // Red #D32D41
     public static final Color COLOR_NOUGHT = new Color(76, 181, 245); // Blue #4CB5F5
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
@@ -132,17 +132,21 @@ public class TTTGraphics extends JFrame {
         if (board[selectedRow][0] == player  // 3-in-the-row
                 && board[selectedRow][1] == player
                 && board[selectedRow][2] == player
+                && board[selectedRow][3] == player
                 || board[0][selectedCol] == player // 3-in-the-column
                 && board[1][selectedCol] == player
                 && board[2][selectedCol] == player
+                && board[3][selectedCol] == player
                 || selectedRow == selectedCol  // 3-in-the-diagonal
                 && board[0][0] == player
                 && board[1][1] == player
                 && board[2][2] == player
-                || selectedRow + selectedCol == 2 // 3-in-the-opposite-diagonal
+                && board[3][3] == player
+                || selectedRow + selectedCol == 3 // 3-in-the-opposite-diagonal
                 && board[0][2] == player
                 && board[1][1] == player
-                && board[2][0] == player) {
+                && board[2][0] == player
+                && board[2][2] == player){
             return (player == Seed.CROSS) ? State.CROSS_WON : State.NOUGHT_WON;
         } else {
             // Nobody win. Check for DRAW (all cells occupied) or PLAYING.
