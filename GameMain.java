@@ -115,22 +115,22 @@ public class GameMain extends JPanel {
 
     /** The entry "main" method */
     public static void main(String[] args) throws ClassNotFoundException {
-//        boolean wrongPassword = true;
-//        Scanner sc = new Scanner(System.in);
-//        do {
-//            System.out.print("Enter Username:");
-//            String uName = sc.next();
-//
-//            System.out.print("Enter Password:");
-//            String pass = sc.next();
-//            String truePass = getPassword(uName);
-//            System.out.println("true pass:" + truePass);
-//            if (pass.equals(truePass)) {
-//                wrongPassword = false;
-//            } else {
-//                System.out.println("Wrong password, please try again!");
-//            }
-//        } while (wrongPassword);
+        boolean wrongPassword = true;
+        Scanner sc = new Scanner(System.in);
+        do {
+            System.out.print("Enter Username:");
+            String uName = sc.next();
+
+            System.out.print("Enter Password:");
+            String pass = sc.next();
+            String truePass = getPassword(uName);
+            System.out.println("true pass:" + truePass);
+            if (pass.equals(truePass)) {
+                wrongPassword = false;
+            } else {
+                System.out.println("Wrong password, please try again!");
+            }
+        } while (wrongPassword);
 
         // Run GUI construction codes in Event-Dispatching thread for thread safety
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -146,42 +146,42 @@ public class GameMain extends JPanel {
         });
     }
 
-//    static String getPassword(String username) throws ClassNotFoundException {
-//        String host, port, databaseName, userName, password;
-//        String pass = "";
-//        host = "mysql-tictactoe-testingnewdb246.c.aivencloud.com";
-//        port = "18905";
-//        databaseName = "tictactoedb";
-//        userName = "";
-//        password = "";
-////        for (int i = 0; i < args.length - 1; i++) {
-////            switch (args[i].toLowerCase(Locale.ROOT)) {
-////                case "-host": host = args[++i]; break;
-////                case "-username": userName = args[++i]; break;
-////                case "-password": password = args[++i]; break;
-////                case "-database": databaseName = args[++i]; break;
-////                case "-port": port = args[++i]; break;
-////            }
-////        }
-//        // JDBC allows to have nullable username and password
-//        if (host == null || port == null || databaseName == null) {
-//            System.out.println("Host, port, database information is required");
-//            return "err";
-//        }
-//        Class.forName("com.mysql.cj.jdbc.Driver");
-//        try (final Connection connection =
-//                     DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", userName, password);
-//             final Statement statement = connection.createStatement();
-//             final ResultSet resultSet = statement.executeQuery("SELECT password from gameuser where username='"+username+"'")) {
-//
-//            while (resultSet.next()) {
-//                //System.out.println("Username: " + resultSet.getString("username"));
-//                pass = resultSet.getString("password");
+    static String getPassword(String username) throws ClassNotFoundException {
+        String host, port, databaseName, userName, password;
+        String pass = "";
+        host = "mysql-bdc0fb9-sedanayoga-c1d0.b.aivencloud.com";
+        port = "18480";
+        databaseName = "defaultdb";
+        userName = "avnadmin";
+        password = "AVNS_sC5VSCXgbjts3LLEcoN";
+//        for (int i = 0; i < args.length - 1; i++) {
+//            switch (args[i].toLowerCase(Locale.ROOT)) {
+//                case "-host": host = args[++i]; break;
+//                case "-username": userName = args[++i]; break;
+//                case "-password": password = args[++i]; break;
+//                case "-database": databaseName = args[++i]; break;
+//                case "-port": port = args[++i]; break;
 //            }
-//        } catch (SQLException e) {
-//            System.out.println("Connection failure.");
-//            e.printStackTrace();
 //        }
-//        return pass;
-//    }
+        // JDBC allows to have nullable username and password
+        if (host == null || port == null || databaseName == null) {
+            System.out.println("Host, port, database information is required");
+            return "err";
+        }
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        try (final Connection connection =
+                     DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", userName, password);
+             final Statement statement = connection.createStatement();
+             final ResultSet resultSet = statement.executeQuery("SELECT password from gameuser where username='"+username+"'")) {
+
+            while (resultSet.next()) {
+                //System.out.println("Username: " + resultSet.getString("username"));
+                pass = resultSet.getString("password");
+            }
+        } catch (SQLException e) {
+            System.out.println("Connection failure.");
+            e.printStackTrace();
+        }
+        return pass;
+    }
 }
