@@ -22,15 +22,19 @@ public enum SoundEffect {
     EXPLODE("audio/explode.wav"),
     DIE("audio/die.wav");
 
+
     /** Nested enumeration for specifying volume */
     public static enum Volume {
         MUTE, LOW, MEDIUM, HIGH
     }
 
+
     public static Volume volume = Volume.LOW;
+
 
     /** Each sound effect has its own clip, loaded with its own sound file. */
     private Clip clip;
+
 
     /** Private Constructor to construct each element of the enum with its own sound file. */
     private SoundEffect(String soundFileName) {
@@ -52,6 +56,7 @@ public enum SoundEffect {
         }
     }
 
+
     /** Play or Re-play the sound effect from the beginning, by rewinding. */
     public void play() {
         if (volume != Volume.MUTE) {
@@ -62,8 +67,10 @@ public enum SoundEffect {
         }
     }
 
+
     /** Optional static method to pre-load all the sound files. */
     static void initGame() {
         values(); // calls the constructor for all the elements
     }
 }
+

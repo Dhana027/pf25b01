@@ -19,13 +19,16 @@ public enum Seed {   // to save as "Seed.java"
     NOUGHT("O", "images/o_icon.png"),
     NO_SEED(" ", null);
 
+
     // Private variables
     private String displayName;
     private Image img = null;
 
+
     // Constructor (must be private)
     private Seed(String name, String imageFilename) {
         this.displayName = name;
+
 
         if (imageFilename != null) {
             URL imgURL = getClass().getClassLoader().getResource(imageFilename);
@@ -40,6 +43,7 @@ public enum Seed {   // to save as "Seed.java"
         }
     }
 
+
     // Public getters
     public String getDisplayName() {
         return displayName;
@@ -48,3 +52,4 @@ public enum Seed {   // to save as "Seed.java"
         return img;
     }
 }
+

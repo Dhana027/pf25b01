@@ -1,8 +1,10 @@
 import javax.swing.*;
 
+
 /** Tic-tac-toe Applet */
 @SuppressWarnings("serial")
 public class AppletMain extends JApplet {
+
 
     /** init() to setup the GUI components */
     @Override
@@ -21,3 +23,6 @@ public class AppletMain extends JApplet {
         }
     }
 }
+
+
+

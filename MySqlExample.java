@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Locale;
 
+
 public class MySqlExample {
     public static void main(String[] args) throws ClassNotFoundException {
         String host, port, databaseName, userName, password;
@@ -33,6 +34,7 @@ public class MySqlExample {
              final Statement statement = connection.createStatement();
              final ResultSet resultSet = statement.executeQuery("SELECT username from gameuser WHERE")) {
 
+
             while (resultSet.next()) {
                 System.out.println("Username: " + resultSet.getString("username"));
             }
@@ -42,3 +44,4 @@ public class MySqlExample {
         }
     }
 }
+
