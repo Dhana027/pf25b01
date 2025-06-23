@@ -47,6 +47,16 @@ public class GameMain extends JPanel {
                             && board.cells[row][col].content == Seed.NO_SEED) {
                         // Update cells[][] and return the new game state after the move
                         currentState = board.stepGame(currentPlayer, row, col);
+                        // Play appropriate sound clip
+                        if (currentState == State.PLAYING) {
+                            if (currentPlayer == Seed.CROSS) {
+                                SoundEffect.EAT_FOOD.play(); // Sound khusus untuk X
+                            } else {
+                                SoundEffect.EXPLODE.play(); // Sound khusus untuk O
+                            }
+                        } else {
+                            SoundEffect.DIE.play();
+                        }
                         // Switch player
                         currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                     }
