@@ -1,0 +1,8 @@
+# Default ignored files
+/shelf/
+/.idea/workspace.xml
+# Folder output hasil kompilasi
+/out/
+
+# File spesifik IDE (IntelliJ)
+.idea/
