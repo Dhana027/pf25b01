@@ -1,7 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.*;
-import java.util.Scanner;
 import javax.swing.*;
 /**
  * Tic-Tac-Toe: Two-player Graphic version with better OO design.
@@ -24,7 +22,9 @@ public class GameMain extends JPanel {
     private Seed currentPlayer;  // the current player
     private JLabel statusBar;    // for displaying status message
 
-    /** Constructor to setup the UI and game components */
+    /**
+     * Constructor to setup the UI and game components
+     */
     public GameMain() {
 
         // This JPanel fires MouseEvent
@@ -73,12 +73,16 @@ public class GameMain extends JPanel {
         newGame();
     }
 
-    /** Initialize the game (run once) */
+    /**
+     * Initialize the game (run once)
+     */
     public void initGame() {
         board = new Board();  // allocate the game-board
     }
 
-    /** Reset the game-board contents and the current-state, ready for new game */
+    /**
+     * Reset the game-board contents and the current-state, ready for new game
+     */
     public void newGame() {
         for (int row = 0; row < Board.ROWS; ++row) {
             for (int col = 0; col < Board.COLS; ++col) {
@@ -89,7 +93,9 @@ public class GameMain extends JPanel {
         currentState = State.PLAYING;  // ready to play
     }
 
-    /** Custom painting codes on this JPanel */
+    /**
+     * Custom painting codes on this JPanel
+     */
     @Override
     public void paintComponent(Graphics g) {  // Callback via repaint()
         super.paintComponent(g);
@@ -113,25 +119,10 @@ public class GameMain extends JPanel {
         }
     }
 
-    /** The entry "main" method */
-    public static void main(String[] args) throws ClassNotFoundException {
-//        boolean wrongPassword = true;
-//        Scanner sc = new Scanner(System.in);
-//        do {
-//            System.out.print("Enter Username:");
-//            String uName = sc.next();
-//
-//            System.out.print("Enter Password:");
-//            String pass = sc.next();
-//            String truePass = getPassword(uName);
-//            System.out.println("true pass:" + truePass);
-//            if (pass.equals(truePass)) {
-//                wrongPassword = false;
-//            } else {
-//                System.out.println("Wrong password, please try again!");
-//            }
-//        } while (wrongPassword);
-
+    /**
+     * The entry "main" method
+     */
+    public static void main(String[] args) {
         // Run GUI construction codes in Event-Dispatching thread for thread safety
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -145,43 +136,4 @@ public class GameMain extends JPanel {
             }
         });
     }
-
-//    static String getPassword(String username) throws ClassNotFoundException {
-//        String host, port, databaseName, userName, password;
-//        String pass = "";
-//        host = "mysql-tictactoe-testingnewdb246.c.aivencloud.com";
-//        port = "18905";
-//        databaseName = "tictactoedb";
-//        userName = "";
-//        password = "";
-////        for (int i = 0; i < args.length - 1; i++) {
-////            switch (args[i].toLowerCase(Locale.ROOT)) {
-////                case "-host": host = args[++i]; break;
-////                case "-username": userName = args[++i]; break;
-////                case "-password": password = args[++i]; break;
-////                case "-database": databaseName = args[++i]; break;
-////                case "-port": port = args[++i]; break;
-////            }
-////        }
-//        // JDBC allows to have nullable username and password
-//        if (host == null || port == null || databaseName == null) {
-//            System.out.println("Host, port, database information is required");
-//            return "err";
-//        }
-//        Class.forName("com.mysql.cj.jdbc.Driver");
-//        try (final Connection connection =
-//                     DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", userName, password);
-//             final Statement statement = connection.createStatement();
-//             final ResultSet resultSet = statement.executeQuery("SELECT password from gameuser where username='"+username+"'")) {
-//
-//            while (resultSet.next()) {
-//                //System.out.println("Username: " + resultSet.getString("username"));
-//                pass = resultSet.getString("password");
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Connection failure.");
-//            e.printStackTrace();
-//        }
-//        return pass;
-//    }
 }
