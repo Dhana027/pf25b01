@@ -55,7 +55,11 @@ public class GameMain extends JPanel {
                                 SoundEffect.EXPLODE.play(); // Sound khusus untuk O
                             }
                         } else {
-                            SoundEffect.DIE.play();
+                            if (currentState == State.DRAW) {
+                                SoundEffect.SERI.play(); // Sound saat draw
+                            } else {
+                                SoundEffect.DIE.play(); // Sound saat menang
+                            }
                         }
                         // Switch player
                         currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
