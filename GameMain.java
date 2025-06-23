@@ -1,8 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.*;
-import java.util.Scanner;
 import javax.swing.*;
+import java.net.URL;
+import java.util.*;
+import java.sql.*;
 /**
  * Tic-Tac-Toe: Two-player Graphic version with better OO design.
  * The Board and Cell classes are separated in their own classes.
@@ -12,27 +13,44 @@ public class GameMain extends JPanel {
 
     // Define named constants for the drawing graphics
     public static final String TITLE = "Tic Tac Toe";
-    public static final Color COLOR_BG = Color.WHITE;
-    public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
-    public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
-    public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
-    public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
+    public static final Color COLOR_CROSS = new Color(255,120,89); // Red #EF6950
+    public static final Color COLOR_NOUGHT = new Color(0, 173, 181);
+    public static final Font FONT_STATUS = new Font("OCR A Extended", Font.BOLD, 20);
+    public static final Color COLOR_STATUS_TEXT = new Color(80, 60, 50);
 
     // Define game objects
     private Board board;         // the game board
     private State currentState;  // the current state of the game
     private Seed currentPlayer;  // the current player
     private JLabel statusBar;    // for displaying status message
+    private ImageIcon backgroundImage;
 
     /** Constructor to setup the UI and game components */
     public GameMain() {
+        //Ambil gambar
+        try{
+            URL imageUrl = getClass().getResource("TicTacToeBG.png");
+            if (imageUrl == null) {
+                throw new Exception("File gambar 'TicTacToeBG.png' tidak ditemukan!");
+            }
+            backgroundImage = new ImageIcon(imageUrl);
+        }catch (Exception e){
+            backgroundImage = null;
+            // Tampilkan pesan error jika gambar tidak ditemukan
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Gambar Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        //Atur panel jadi transparan
+        setOpaque(false);
 
         // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
+                int headerHeight = 100;
                 int mouseX = e.getX();
-                int mouseY = e.getY();
+                int mouseY = e.getY() - headerHeight;
+
                 // Get the row and column clicked
                 int row = mouseY / Cell.SIZE;
                 int col = mouseX / Cell.SIZE;
@@ -53,20 +71,32 @@ public class GameMain extends JPanel {
             }
         });
 
+        //Tambah header judul
+        JPanel headerPanel = new JPanel();
+        headerPanel.setOpaque(false); // Buat panel header transparan
+        headerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 15)); // Atur layout dan padding atas/bawah
+
+        JLabel titleLabel = new JLabel(TITLE);
+        titleLabel.setFont(new Font("Arial Rounded MT Bold", Font.BOLD, 36));
+        titleLabel.setForeground(COLOR_STATUS_TEXT);
+        headerPanel.add(titleLabel);
+
+        // Tambahkan ruang kosong di bawah judul sebelum papan permainan
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
+
         // Setup the status bar (JLabel) to display status message
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
-        statusBar.setBackground(COLOR_BG_STATUS);
         statusBar.setOpaque(true);
-        statusBar.setPreferredSize(new Dimension(300, 30));
-        statusBar.setHorizontalAlignment(JLabel.LEFT);
-        statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
+        statusBar.setBackground(new Color(245, 245, 220));
+        statusBar.setHorizontalAlignment(JLabel.CENTER);
+        statusBar.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        super.setLayout(new BorderLayout());
-        super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
-        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
-        // account for statusBar in height
-        super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
+        //panel utama
+        setLayout(new BorderLayout());
+        add(headerPanel, BorderLayout.PAGE_START); // Tambahkan header di ATAS
+        add(statusBar, BorderLayout.PAGE_END);
+        setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 150));
 
         // Set up Game
         initGame();
@@ -93,9 +123,17 @@ public class GameMain extends JPanel {
     @Override
     public void paintComponent(Graphics g) {  // Callback via repaint()
         super.paintComponent(g);
-        setBackground(COLOR_BG); // set its background color
-
-        board.paint(g);  // ask the game board to paint itself
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage.getImage(), 0, 0, getWidth(), getHeight(), this);
+        } else {
+            // Fallback dengan warna solid jika gambar tidak ditemukan
+            g.setColor(new Color(213, 237, 240));
+            g.fillRect(0, 0, getWidth(), getHeight());
+        }
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.translate(0, 100);
+        board.paint(g2d); // ask the game board to paint itself
+        g2d.dispose();
 
         // Print status-bar message
         if (currentState == State.PLAYING) {
@@ -115,22 +153,22 @@ public class GameMain extends JPanel {
 
     /** The entry "main" method */
     public static void main(String[] args) throws ClassNotFoundException {
-//        boolean wrongPassword = true;
-//        Scanner sc = new Scanner(System.in);
-//        do {
-//            System.out.print("Enter Username:");
-//            String uName = sc.next();
-//
-//            System.out.print("Enter Password:");
-//            String pass = sc.next();
-//            String truePass = getPassword(uName);
-//            System.out.println("true pass:" + truePass);
-//            if (pass.equals(truePass)) {
-//                wrongPassword = false;
-//            } else {
-//                System.out.println("Wrong password, please try again!");
-//            }
-//        } while (wrongPassword);
+        boolean wrongPassword = true;
+        Scanner sc = new Scanner(System.in);
+        do {
+            System.out.print("Enter Username:");
+            String uName = sc.next();
+
+            System.out.print("Enter Password:");
+            String pass = sc.next();
+            String truePass = getPassword(uName);
+            System.out.println("true pass:" + truePass);
+            if (pass.equals(truePass)) {
+                wrongPassword = false;
+            } else {
+                System.out.println("Wrong password, please try again!");
+            }
+        } while (wrongPassword);
 
         // Run GUI construction codes in Event-Dispatching thread for thread safety
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -146,42 +184,42 @@ public class GameMain extends JPanel {
         });
     }
 
-//    static String getPassword(String username) throws ClassNotFoundException {
-//        String host, port, databaseName, userName, password;
-//        String pass = "";
-//        host = "mysql-tictactoe-testingnewdb246.c.aivencloud.com";
-//        port = "18905";
-//        databaseName = "tictactoedb";
-//        userName = "";
-//        password = "";
-////        for (int i = 0; i < args.length - 1; i++) {
-////            switch (args[i].toLowerCase(Locale.ROOT)) {
-////                case "-host": host = args[++i]; break;
-////                case "-username": userName = args[++i]; break;
-////                case "-password": password = args[++i]; break;
-////                case "-database": databaseName = args[++i]; break;
-////                case "-port": port = args[++i]; break;
-////            }
-////        }
-//        // JDBC allows to have nullable username and password
-//        if (host == null || port == null || databaseName == null) {
-//            System.out.println("Host, port, database information is required");
-//            return "err";
-//        }
-//        Class.forName("com.mysql.cj.jdbc.Driver");
-//        try (final Connection connection =
-//                     DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", userName, password);
-//             final Statement statement = connection.createStatement();
-//             final ResultSet resultSet = statement.executeQuery("SELECT password from gameuser where username='"+username+"'")) {
-//
-//            while (resultSet.next()) {
-//                //System.out.println("Username: " + resultSet.getString("username"));
-//                pass = resultSet.getString("password");
+    static String getPassword(String username) throws ClassNotFoundException {
+        String host, port, databaseName, userName, password;
+        String pass = "";
+        host = "mysql-bdc0fb9-sedanayoga-c1d0.b.aivencloud.com";
+        port = "18480";
+        databaseName = "defaultdb";
+        userName = "avnadmin";
+        password = "AVNS_sC5VSCXgbjts3LLEcoN";
+//        for (int i = 0; i < args.length - 1; i++) {
+//            switch (args[i].toLowerCase(Locale.ROOT)) {
+//                case "-host": host = args[++i]; break;
+//                case "-username": userName = args[++i]; break;
+//                case "-password": password = args[++i]; break;
+//                case "-database": databaseName = args[++i]; break;
+//                case "-port": port = args[++i]; break;
 //            }
-//        } catch (SQLException e) {
-//            System.out.println("Connection failure.");
-//            e.printStackTrace();
 //        }
-//        return pass;
-//    }
+        // JDBC allows to have nullable username and password
+        if (host == null || port == null || databaseName == null) {
+            System.out.println("Host, port, database information is required");
+            return "err";
+        }
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        try (final Connection connection =
+                     DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", userName, password);
+             final Statement statement = connection.createStatement();
+             final ResultSet resultSet = statement.executeQuery("SELECT password from gameuser where username='"+username+"'")) {
+
+            while (resultSet.next()) {
+                //System.out.println("Username: " + resultSet.getString("username"));
+                pass = resultSet.getString("password");
+            }
+        } catch (SQLException e) {
+            System.out.println("Connection failure.");
+            e.printStackTrace();
+        }
+        return pass;
+    }
 }

@@ -4,11 +4,11 @@ import java.awt.*;
  */
 public class Cell {
     // Define named constants for drawing
-    public static final int SIZE = 120; // cell width/height (square)
+    public static final int SIZE = 110; // cell width/height (square)
     // Symbols (cross/nought) are displayed inside a cell, with padding from border
-    public static final int PADDING = SIZE / 5;
+    public static final int PADDING = SIZE / 6;
     public static final int SEED_SIZE = SIZE - PADDING * 2;
-    public static final int SEED_STROKE_WIDTH = 8; // pen's stroke width
+    public static final int SEED_STROKE_WIDTH = 10; // pen's stroke width
 
     // Define properties (package-visible)
     /** Content of this cell (Seed.EMPTY, Seed.CROSS, or Seed.NOUGHT) */
@@ -20,7 +20,7 @@ public class Cell {
     public Cell(int row, int col) {
         this.row = row;
         this.col = col;
-        content = Seed.NO_SEED;
+        newGame();
     }
 
     /** Reset this cell's content to EMPTY, ready for new game */
