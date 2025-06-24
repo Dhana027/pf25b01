@@ -13,7 +13,7 @@ public class GameMain extends JPanel {
     // Define named constants for the drawing graphics
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.BLACK;
-    public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
+    public static final Color COLOR_BG_STATUS = new Color(220, 127, 127);
     public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
     public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
@@ -195,27 +195,29 @@ public class GameMain extends JPanel {
         }
     }
 
-
-    /**
-     * The entry "main" method
-     */
+    /** The entry "main" method */
     public static void main(String[] args) {
         if (performLogin()) {
-        // Run GUI construction codes in Event-Dispatching thread for thread safety
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                JFrame frame = new JFrame(TITLE);
-                // Set the content-pane of the JFrame to an instance of main JPanel
-                frame.setContentPane(new GameMain());
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setLocationRelativeTo(null); // center the application window
-                frame.setVisible(true);            // show it
-            }
-        });
+            // Initialize and play background music in a loop
+            SoundEffect.initGame();
+            SoundEffect.BACKGROUND.loop();
+            // Run GUI construction codes in Event-Dispatching thread for thread safety
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    JFrame frame = new JFrame(TITLE);
+                    // Set the content-pane of the JFrame to an instance of main JPanel
+                    frame.setContentPane(new GameMain()); // set main panel
+                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    frame.pack();                         // auto size
+                    frame.setLocationRelativeTo(null);    // center the window
+                    frame.setVisible(true);               // show the window
+                }
+            });
+
         } else {
-            // Jika login gagal atau dibatalkan, program selesai.
-            System.out.println("Login Canceled. Program Stopped.");
+            //Login was canceled or failed
+            System.out.println("Login canceled. Program terminated.");
         }
     }
 

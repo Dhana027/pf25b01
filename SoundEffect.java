@@ -20,18 +20,16 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public enum SoundEffect {
     EAT_FOOD("audio/o.wav"),
     EXPLODE("audio/x.wav"),
-    DIE("audio/die_new.wav"),
-    SERI("audio/die.wav");
-
+    SERI("audio/die_new.wav"),
+    DIE("audio/die.wav"),
+    BACKGROUND("audio/Background.wav");
 
     /** Nested enumeration for specifying volume */
     public static enum Volume {
         MUTE, LOW, MEDIUM, HIGH
     }
 
-
     public static Volume volume = Volume.LOW;
-
 
     /** Each sound effect has its own clip, loaded with its own sound file. */
     private Clip clip;
@@ -68,6 +66,15 @@ public enum SoundEffect {
         }
     }
 
+    /** Play the sound effect in loop (for background music) */
+    public void loop() {
+        if (volume != Volume.MUTE) {
+            if (clip.isRunning())
+                clip.stop();
+            clip.setFramePosition(0);
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
+        }
+    }
 
     /** Optional static method to pre-load all the sound files. */
     static void initGame() {
