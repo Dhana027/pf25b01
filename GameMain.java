@@ -10,6 +10,8 @@ public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
 
 
+
+
     // Define named constants for the drawing graphics
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.BLACK;
@@ -19,6 +21,8 @@ public class GameMain extends JPanel {
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
 
 
+
+
     // Define game objects
     private Board board;         // the game board
     private State currentState;  // the current state of the game
@@ -26,53 +30,68 @@ public class GameMain extends JPanel {
     private JLabel statusBar;    // for displaying status message
     private int gameMode;
     private AIPlayerTableLookup aiPlayer;
+    private static String loggedInUsername;
+    private Seed playerSeed;
+    private int scoreX = 0;
+    private int scoreO = 0;
+    private JLabel scoreLabel;
+
 
     private void selectGameMode() {
-        Object[] options = {"Player vs Player", "Player vs Bot"};
-        int choice = JOptionPane.showOptionDialog(
-                null, // parent component (null untuk di tengah layar)
-                "Choose Game Mode:", // pesan dialog
-                "Mode", // judul dialog
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null, // tidak ada ikon custom
-                options, // teks tombol
-                options[0] // tombol default
-        );
+        Object[] modeOptions = {"Player vs Player", "Player vs Bot"};
+        int modeChoice = JOptionPane.showOptionDialog(
+                null, "Choose Game Mode:", "Mode",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, modeOptions, modeOptions[0]);
 
-        if (choice == 0) {
-            // Pilihan pertama: Player vs Player
-            gameMode = 1;
-        } else if (choice == 1) {
-            // Pilihan kedua: Player vs Bot
-            gameMode = 2;
-        } else {
-            // Jika pengguna menutup dialog, keluar dari aplikasi
+        if (modeChoice == JOptionPane.CLOSED_OPTION) {
             System.exit(0);
         }
+
+        gameMode = (modeChoice == 0) ? 1 : 2;
+
+        Object[] symbolOptions = {"Play as X", "Play as O"};
+        int symbolChoice = JOptionPane.showOptionDialog(
+                null, "Choose your symbol:", "Symbol",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, symbolOptions, symbolOptions[0]);
+
+        if (symbolChoice == JOptionPane.CLOSED_OPTION) {
+            System.exit(0);
+        }
+
+        playerSeed = (symbolChoice == 0) ? Seed.CROSS : Seed.NOUGHT;
     }
+
 
     private void AImove() {
         // Pastikan game masih berjalan sebelum AI bergerak
         if (currentState != State.PLAYING) return;
 
+
         // 1. Beritahu AI bidak apa yang sedang ia gunakan (selalu 'O')
         aiPlayer.setSeed(Seed.NOUGHT);
+
 
         // 2. Minta AI untuk menentukan gerakan terbaiknya
         int[] move = aiPlayer.move(); // Mendapatkan {baris, kolom} dari AI
 
+
         // 3. Lakukan gerakan tersebut di papan
         currentState = board.stepGame(Seed.NOUGHT, move[0], move[1]);
+
 
         // 4. Kembalikan giliran ke pemain manusia
         currentPlayer = Seed.CROSS;
     }
 
+
     /**
      * Constructor to setup the UI and game components
      */
     public GameMain() {
+
+
 
 
         // This JPanel fires MouseEvent
@@ -84,6 +103,8 @@ public class GameMain extends JPanel {
                 // Get the row and column clicked
                 int row = mouseY / Cell.SIZE;
                 int col = mouseX / Cell.SIZE;
+
+
 
 
                 if (currentState == State.PLAYING) {
@@ -111,13 +132,34 @@ public class GameMain extends JPanel {
                             GameMain.this.AImove();
                         }
                     }
-                } else {        // game over
-                    newGame();  // restart the game
+                } else {
+                    updateStatistics(currentState);
+                    updateScore(currentState);
+
+                    int response = JOptionPane.showOptionDialog(null,
+                            "Game Over. What do you want to do?",
+                            "Game Finished",
+                            JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.QUESTION_MESSAGE,
+                            null,
+                            new String[]{"Play Again", "Quit"},
+                            "Play Again");
+
+                    if (response == 0) {
+                        resetBoardOnly(); // main lagi, score tetap
+                    } else {
+                        scoreX = 0;
+                        scoreO = 0;
+                        updateScoreLabel();
+                        newGame(); // reset game dan score
+                    }
                 }
                 // Refresh the drawing canvas
                 repaint();  // Callback paintComponent().
             }
         });
+
+
 
 
         // Setup the status bar (JLabel) to display status message
@@ -129,18 +171,28 @@ public class GameMain extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
-
         super.setLayout(new BorderLayout());
+        scoreLabel = new JLabel("Score - X: 0 | O: 0");
+        scoreLabel.setFont(FONT_STATUS);
+        scoreLabel.setBackground(Color.WHITE);
+        scoreLabel.setOpaque(true);
+        scoreLabel.setHorizontalAlignment(JLabel.CENTER);
+        scoreLabel.setPreferredSize(new Dimension(300, 30));
+        super.add(scoreLabel, BorderLayout.PAGE_START);
         super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
         // account for statusBar in height
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
 
+
+
         // Set up Game
         initGame();
         newGame();
     }
+
+
 
 
     /**
@@ -152,19 +204,26 @@ public class GameMain extends JPanel {
     }
 
 
+
+
     /**
      * Reset the game-board contents and the current-state, ready for new game
      */
     public void newGame() {
         GameMain.this.selectGameMode();
-        for (int row = 0; row < Board.ROWS; ++row) {
-            for (int col = 0; col < Board.COLS; ++col) {
-                board.cells[row][col].content = Seed.NO_SEED; // all cells empty
-            }
+        resetBoardOnly();
+        board.newGame();
+
+        currentState = State.PLAYING;
+        currentPlayer = Seed.CROSS;
+
+        if (gameMode == 2 && playerSeed == Seed.NOUGHT) {
+            AImove();
         }
-        currentPlayer = Seed.CROSS;    // cross plays first
-        currentState = State.PLAYING;  // ready to play
     }
+
+
+
 
 
     /**
@@ -176,7 +235,11 @@ public class GameMain extends JPanel {
         setBackground(COLOR_BG); // set its background color
 
 
+
+
         board.paint(g);  // ask the game board to paint itself
+
+
 
 
         // Print status-bar message
@@ -194,6 +257,7 @@ public class GameMain extends JPanel {
             statusBar.setText("'O' Won! Click to play again.");
         }
     }
+
 
     /** The entry "main" method */
     public static void main(String[] args) {
@@ -215,11 +279,13 @@ public class GameMain extends JPanel {
                 }
             });
 
+
         } else {
             //Login was canceled or failed
             System.out.println("Login canceled. Program terminated.");
         }
     }
+
 
     static String getPassword(String username) throws ClassNotFoundException {
         String host, port, databaseName, userName, password;
@@ -249,6 +315,7 @@ public class GameMain extends JPanel {
              final Statement statement = connection.createStatement();
              final ResultSet resultSet = statement.executeQuery("SELECT password from gameuser where username='"+username+"'")) {
 
+
             while (resultSet.next()) {
                 //System.out.println("Username: " + resultSet.getString("username"));
                 pass = resultSet.getString("password");
@@ -260,6 +327,7 @@ public class GameMain extends JPanel {
         return pass;
     }
 
+
     private static boolean performLogin() {
         // Membuat panel custom untuk dialog login
         JPanel panel = new JPanel(new BorderLayout(5, 5));
@@ -268,6 +336,7 @@ public class GameMain extends JPanel {
         labels.add(new JLabel("Password", SwingConstants.RIGHT));
         panel.add(labels, BorderLayout.WEST);
 
+
         JPanel controls = new JPanel(new GridLayout(0, 1, 2, 2));
         JTextField usernameField = new JTextField(10);
         controls.add(usernameField);
@@ -275,19 +344,23 @@ public class GameMain extends JPanel {
         controls.add(passwordField);
         panel.add(controls, BorderLayout.CENTER);
 
+
         while (true) { // Loop sampai login berhasil atau dibatalkan
             int result = JOptionPane.showConfirmDialog(null, panel, "Login",
                     JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
 
             if (result == JOptionPane.OK_OPTION) {
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
 
+
                 try {
                     String truePass = getPassword(username);
                     if (!password.isEmpty() && password.equals(truePass)) {
+                        loggedInUsername = username; // Simpan username global
                         JOptionPane.showMessageDialog(null, "Login Success! Welcome, " + username + ".");
-                        return true; // Login sukses, keluar dari loop
+                        return true;
                     } else {
                         JOptionPane.showMessageDialog(null, "Wrong username or password.", "Login failed", JOptionPane.ERROR_MESSAGE);
                         // Loop akan berlanjut
@@ -302,5 +375,68 @@ public class GameMain extends JPanel {
             }
         }
     }
+
+    private void updateStatistics(State result) {
+        String host = "mysql-bdc0fb9-sedanayoga-c1d0.b.aivencloud.com";
+        String port = "18480";
+        String databaseName = "defaultdb";
+        String userName = "avnadmin";
+        String password = "AVNS_sC5VSCXgbjts3LLEcoN";
+
+        String fieldToUpdate = null;
+
+        if ((result == State.CROSS_WON && playerSeed == Seed.CROSS) ||
+                (result == State.NOUGHT_WON && playerSeed == Seed.NOUGHT)) {
+            fieldToUpdate = "won";
+        } else if ((result == State.CROSS_WON && playerSeed == Seed.NOUGHT) ||
+                (result == State.NOUGHT_WON && playerSeed == Seed.CROSS)) {
+            fieldToUpdate = "lose";
+        } else if (result == State.DRAW) {
+            fieldToUpdate = "draw";
+        }
+
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require",
+                userName, password);
+             Statement stmt = conn.createStatement()) {
+
+            if (fieldToUpdate != null) {
+                stmt.executeUpdate("UPDATE gameuser SET " + fieldToUpdate + " = " + fieldToUpdate + " + 1 WHERE username = '" + loggedInUsername + "'");
+            }
+
+            stmt.executeUpdate("UPDATE gameuser SET play = play + 1 WHERE username = '" + loggedInUsername + "'");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateScore(State result) {
+        if (result == State.CROSS_WON) {
+            scoreX++;
+        } else if (result == State.NOUGHT_WON) {
+            scoreO++;
+        }
+        updateScoreLabel();
+    }
+
+    private void updateScoreLabel() {
+        scoreLabel.setText("Score - X: " + scoreX + " | O: " + scoreO);
+    }
+
+    private void resetBoardOnly() {
+        board.newGame();
+        currentState = State.PLAYING;
+        currentPlayer = Seed.CROSS;
+
+        if (gameMode == 2 && playerSeed == Seed.NOUGHT) {
+            AImove();
+        }
+        repaint();
+    }
 }
+
+
+
+
 
