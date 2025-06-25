@@ -1,6 +1,6 @@
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.net.URL;
-import javax.swing.ImageIcon;
 /**
  * This enum is used by:
  * 1. Player: takes value of CROSS or NOUGHT

@@ -1,4 +1,5 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 /** AIPlayer using Minimax algorithm */
 public class AIPlayerMinimax extends AIPlayer {
 

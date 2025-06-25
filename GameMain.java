@@ -1,7 +1,8 @@
-import java.awt.*;
-import java.awt.event.*;
-import java.sql.*;
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.*;
 /**
  * Tic-Tac-Toe: Two-player Graphic version with better OO design.
  * The Board and Cell classes are separated in their own classes.
@@ -29,12 +30,19 @@ public class GameMain extends JPanel {
     private Seed currentPlayer;  // the current player
     private JLabel statusBar;    // for displaying status message
     private int gameMode;
-    private AIPlayerTableLookup aiPlayer;
     private static String loggedInUsername;
     private Seed playerSeed;
+    private Seed aiSeed;
     private int scoreX = 0;
     private int scoreO = 0;
     private JLabel scoreLabel;
+
+    private int difficultyLevel;
+    private AIPlayer aiPlayerEasy;
+    private AIPlayer aiPlayerMedium;
+    private AIPlayer aiPlayerHard;
+
+
 
 
     private void selectGameMode() {
@@ -50,6 +58,15 @@ public class GameMain extends JPanel {
 
         gameMode = (modeChoice == 0) ? 1 : 2;
 
+        if (gameMode == 2) { // Jika Player vs Bot
+            Object[] difficultyOptions = {"Easy", "Medium", "Hard"};
+            int difficultyChoice = JOptionPane.showOptionDialog(this, "Select Bot Difficulty", "Difficulty",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, difficultyOptions, difficultyOptions[1]);
+
+            if (difficultyChoice == -1) System.exit(0);
+            difficultyLevel = difficultyChoice + 1; // 1, 2, or 3
+        }
+
         Object[] symbolOptions = {"Play as X", "Play as O"};
         int symbolChoice = JOptionPane.showOptionDialog(
                 null, "Choose your symbol:", "Symbol",
@@ -61,28 +78,35 @@ public class GameMain extends JPanel {
         }
 
         playerSeed = (symbolChoice == 0) ? Seed.CROSS : Seed.NOUGHT;
+        aiSeed = (playerSeed == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
     }
 
 
     private void AImove() {
-        // Pastikan game masih berjalan sebelum AI bergerak
         if (currentState != State.PLAYING) return;
 
+        AIPlayer currentAI;
+        switch (difficultyLevel) {
+            case 1: currentAI = aiPlayerEasy; break;
+            case 2: currentAI = aiPlayerMedium; break;
+            default: currentAI = aiPlayerHard; break;
+        }
 
-        // 1. Beritahu AI bidak apa yang sedang ia gunakan (selalu 'O')
-        aiPlayer.setSeed(Seed.NOUGHT);
+        currentAI.setSeed(aiSeed); // Beritahu AI bidak apa yang ia gunakan
+        int[] move = currentAI.move();
 
+        if (move != null) {
+            currentState = board.stepGame(aiSeed, move[0], move[1]);
+            playMoveSound();
+        }
 
-        // 2. Minta AI untuk menentukan gerakan terbaiknya
-        int[] move = aiPlayer.move(); // Mendapatkan {baris, kolom} dari AI
+        currentPlayer = playerSeed; // Kembalikan giliran ke pemain manusia
+    }
 
-
-        // 3. Lakukan gerakan tersebut di papan
-        currentState = board.stepGame(Seed.NOUGHT, move[0], move[1]);
-
-
-        // 4. Kembalikan giliran ke pemain manusia
-        currentPlayer = Seed.CROSS;
+    private void playMoveSound() {
+        if (currentState == State.PLAYING) SoundEffect.EAT_FOOD.play();
+        else if (currentState == State.DRAW) SoundEffect.SERI.play();
+        else SoundEffect.DIE.play();
     }
 
 
@@ -129,7 +153,12 @@ public class GameMain extends JPanel {
                         // Switch player
                         currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                         if (gameMode == 2 && currentState == State.PLAYING) {
-                            GameMain.this.AImove();
+                            Timer timer = new Timer(500, ae -> {
+                                AImove();
+                                repaint();
+                            });
+                            timer.setRepeats(false); // Pastikan timer hanya berjalan sekali
+                            timer.start();
                         }
                     }
                 } else {
@@ -200,7 +229,9 @@ public class GameMain extends JPanel {
      */
     public void initGame() {
         board = new Board();  // allocate the game-board
-        aiPlayer = new AIPlayerTableLookup(board);
+        aiPlayerEasy = new AIPlayerRandom(board);
+        aiPlayerMedium = new AIPlayerOffensive(board);
+        aiPlayerHard = new AIPlayerDefensiveHard(board);
     }
 
 
@@ -266,7 +297,7 @@ public class GameMain extends JPanel {
             SoundEffect.initGame();
             SoundEffect.BACKGROUND.loop();
             // Run GUI construction codes in Event-Dispatching thread for thread safety
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
                     JFrame frame = new JFrame(TITLE);
