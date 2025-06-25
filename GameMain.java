@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 import java.sql.*;
 /**
  * Tic-Tac-Toe: Two-player Graphic version with better OO design.
@@ -9,9 +10,6 @@ import java.sql.*;
  */
 public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
-
-
-
 
     // Define named constants for the drawing graphics
     public static final String TITLE = "Tic Tac Toe";
@@ -42,8 +40,7 @@ public class GameMain extends JPanel {
     private AIPlayer aiPlayerMedium;
     private AIPlayer aiPlayerHard;
 
-
-
+    private Image backgroundImage;
 
     private void selectGameMode() {
         Object[] modeOptions = {"Player vs Player", "Player vs Bot"};
@@ -114,10 +111,17 @@ public class GameMain extends JPanel {
      * Constructor to setup the UI and game components
      */
     public GameMain() {
-
-
-
-
+        try {
+            URL imgURL = getClass().getClassLoader().getResource("images/TicTacToe_BG.png");
+            if (imgURL != null) {
+                backgroundImage = new ImageIcon(imgURL).getImage();
+            } else {
+                System.err.println("File gambar tidak ditemukan: images/TicTacToe_BG.png");
+            }
+        } catch (Exception e) {
+            System.err.println("Gagal memuat gambar latar belakang.");
+            e.printStackTrace();
+        }
         // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
             @Override
@@ -188,9 +192,6 @@ public class GameMain extends JPanel {
             }
         });
 
-
-
-
         // Setup the status bar (JLabel) to display status message
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
@@ -213,16 +214,10 @@ public class GameMain extends JPanel {
         // account for statusBar in height
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
-
-
-
         // Set up Game
         initGame();
         newGame();
     }
-
-
-
 
     /**
      * Initialize the game (run once)
@@ -233,9 +228,6 @@ public class GameMain extends JPanel {
         aiPlayerMedium = new AIPlayerOffensive(board);
         aiPlayerHard = new AIPlayerDefensiveHard(board);
     }
-
-
-
 
     /**
      * Reset the game-board contents and the current-state, ready for new game
@@ -253,25 +245,19 @@ public class GameMain extends JPanel {
         }
     }
 
-
-
-
-
     /**
      * Custom painting codes on this JPanel
      */
     @Override
     public void paintComponent(Graphics g) {  // Callback via repaint()
         super.paintComponent(g);
-        setBackground(COLOR_BG); // set its background color
-
-
-
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), null);
+        } else {
+            setBackground(COLOR_BG);
+        }
 
         board.paint(g);  // ask the game board to paint itself
-
-
-
 
         // Print status-bar message
         if (currentState == State.PLAYING) {
