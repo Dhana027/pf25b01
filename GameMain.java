@@ -494,8 +494,3 @@ public class GameMain extends JPanel {
         repaint();
     }
 }
-
-
-
-
-
