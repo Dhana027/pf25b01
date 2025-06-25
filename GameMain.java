@@ -196,16 +196,16 @@ public class GameMain extends JPanel {
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
-        statusBar.setOpaque(true);
+        statusBar.setOpaque(false);
         statusBar.setPreferredSize(new Dimension(300, 30));
-        statusBar.setHorizontalAlignment(JLabel.LEFT);
+        statusBar.setHorizontalAlignment(JLabel.CENTER);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
         super.setLayout(new BorderLayout());
         scoreLabel = new JLabel("Score - X: 0 | O: 0");
         scoreLabel.setFont(FONT_STATUS);
         scoreLabel.setBackground(Color.WHITE);
-        scoreLabel.setOpaque(true);
+        scoreLabel.setOpaque(false);
         scoreLabel.setHorizontalAlignment(JLabel.CENTER);
         scoreLabel.setPreferredSize(new Dimension(300, 30));
         super.add(scoreLabel, BorderLayout.PAGE_START);
@@ -256,6 +256,12 @@ public class GameMain extends JPanel {
         } else {
             setBackground(COLOR_BG);
         }
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(new Color(0, 0, 0, 128));
+
+        g2d.fillRect(0, 0, getWidth(), scoreLabel.getHeight());
+        g2d.fillRect(0, getHeight() - statusBar.getHeight(), getWidth(), statusBar.getHeight());
 
         board.paint(g);  // ask the game board to paint itself
 

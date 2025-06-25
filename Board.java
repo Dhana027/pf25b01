@@ -92,18 +92,24 @@ public class Board {
     /** Paint itself on the graphics canvas, given the Graphics context */
     public void paint(Graphics g) {
         // Draw the grid-lines
-        g.setColor(COLOR_GRID);
+        Graphics2D g2d = (Graphics2D) g;
+
+        Color color1 = new Color(87, 56, 36); // Coklat gelap
+        Color color2 = new Color(140, 98, 71); // Coklat terang
+
         for (int row = 1; row < ROWS; ++row) {
-            g.fillRoundRect(0, Cell.SIZE * row - GRID_WIDTH_HALF,
-                    CANVAS_WIDTH - 1, GRID_WIDTH,
-                    GRID_WIDTH, GRID_WIDTH);
-        }
-        for (int col = 1; col < COLS; ++col) {
-            g.fillRoundRect(Cell.SIZE * col - GRID_WIDTH_HALF, 0 + Y_OFFSET,
-                    GRID_WIDTH, CANVAS_HEIGHT - 1,
-                    GRID_WIDTH, GRID_WIDTH);
+            GradientPaint gp = new GradientPaint(0, Cell.SIZE * row - GRID_WIDTH_HALF, color1,
+                    0, Cell.SIZE * row + GRID_WIDTH_HALF, color2);
+            g2d.setPaint(gp);
+            g2d.fillRect(0, Cell.SIZE * row - GRID_WIDTH_HALF, CANVAS_WIDTH - 1, GRID_WIDTH);
         }
 
+        for (int col = 1; col < COLS; ++col) {
+            GradientPaint gp = new GradientPaint(Cell.SIZE * col - GRID_WIDTH_HALF, 0, color1,
+                    Cell.SIZE * col + GRID_WIDTH_HALF, 0, color2);
+            g2d.setPaint(gp);
+            g2d.fillRect(Cell.SIZE * col - GRID_WIDTH_HALF, 0 + Y_OFFSET, GRID_WIDTH, CANVAS_HEIGHT - 1);
+        }
 
         // Draw all the cells
         for (int row = 0; row < ROWS; ++row) {
