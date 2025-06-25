@@ -18,7 +18,7 @@ public enum SoundEffect {
     EXPLODE("audio/x.wav"),
     SERI("audio/die_new.wav"),
     DIE("audio/die.wav"),
-    BACKGROUND("audio/Background.wav");
+    BACKSOUND("audio/Backsound.wav");
 
     /** Nested enumeration for specifying volume */
     public static enum Volume {

@@ -285,9 +285,9 @@ public class GameMain extends JPanel {
     /** The entry "main" method */
     public static void main(String[] args) {
         if (performLogin()) {
-            // Initialize and play background music in a loop
+            // Initialize and play backsound music in a loop
             SoundEffect.initGame();
-            SoundEffect.BACKGROUND.loop();
+            SoundEffect.BACKSOUND.loop();
             // Run GUI construction codes in Event-Dispatching thread for thread safety
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
