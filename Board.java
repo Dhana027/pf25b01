@@ -19,12 +19,13 @@ public class Board {
     /** Composes of 2D array of ROWS-by-COLS Cell instances */
     Cell[][] cells;
 
+    private boolean hasWinningLine = false;
+    private int winLineX1, winLineY1, winLineX2, winLineY2;
 
     /** Constructor to initialize the game board */
     public Board() {
         initGame();
     }
-
 
     /** Initialize the game objects (run once) */
     public void initGame() {
@@ -38,7 +39,6 @@ public class Board {
         }
     }
 
-
     /** Reset the game board, ready for new game */
     public void newGame() {
         for (int row = 0; row < ROWS; ++row) {
@@ -46,6 +46,7 @@ public class Board {
                 cells[row][col].newGame(); // clear the cell content
             }
         }
+        hasWinningLine = false;
     }
 
 
@@ -57,7 +58,6 @@ public class Board {
     public State stepGame(Seed player, int selectedRow, int selectedCol) {
         // Update game board
         cells[selectedRow][selectedCol].content = player;
-
 
         // Compute and return the new game state
         if (cells[selectedRow][0].content == player  // 3-in-the-row
@@ -74,6 +74,35 @@ public class Board {
                 && cells[0][2].content == player
                 && cells[1][1].content == player
                 && cells[2][0].content == player) {
+            hasWinningLine = true;
+            // Cek lagi untuk kemenangan baris
+            if (cells[selectedRow][0].content == player && cells[selectedRow][1].content == player && cells[selectedRow][2].content == player) {
+                winLineX1 = 0;
+                winLineY1 = Cell.SIZE / 2 + selectedRow * Cell.SIZE;
+                winLineX2 = CANVAS_WIDTH;
+                winLineY2 = winLineY1;
+            }
+            // Cek lagi untuk kemenangan kolom
+            else if (cells[0][selectedCol].content == player && cells[1][selectedCol].content == player && cells[2][selectedCol].content == player) {
+                winLineX1 = Cell.SIZE / 2 + selectedCol * Cell.SIZE;
+                winLineY1 = 0;
+                winLineX2 = winLineX1;
+                winLineY2 = CANVAS_HEIGHT;
+            }
+            // Cek lagi untuk kemenangan diagonal utama
+            else if (selectedRow == selectedCol && cells[0][0].content == player && cells[1][1].content == player && cells[2][2].content == player) {
+                winLineX1 = 0;
+                winLineY1 = 0;
+                winLineX2 = CANVAS_WIDTH;
+                winLineY2 = CANVAS_HEIGHT;
+            }
+            // Cek lagi untuk kemenangan diagonal kedua
+            else if (selectedRow + selectedCol == 2 && cells[0][2].content == player && cells[1][1].content == player && cells[2][0].content == player) {
+                winLineX1 = CANVAS_WIDTH;
+                winLineY1 = 0;
+                winLineX2 = 0;
+                winLineY2 = CANVAS_HEIGHT;
+            }
             return (player == Seed.CROSS) ? State.CROSS_WON : State.NOUGHT_WON;
         } else {
             // Nobody win. Check for DRAW (all cells occupied) or PLAYING.
@@ -116,6 +145,14 @@ public class Board {
             for (int col = 0; col < COLS; ++col) {
                 cells[row][col].paint(g);  // ask the cell to paint itself
             }
+        }
+        if (hasWinningLine) {
+            Graphics2D g3d = (Graphics2D) g;
+            // Atur warna dan ketebalan garis
+            g3d.setColor(new Color(255, 69, 0)); // Oranye-merah
+            g3d.setStroke(new BasicStroke(GRID_WIDTH + 2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)); // Garis tebal dan bulat
+            // Gambar garisnya
+            g3d.drawLine(winLineX1, winLineY1, winLineX2, winLineY2);
         }
     }
 }
