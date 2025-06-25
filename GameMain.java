@@ -308,7 +308,7 @@ public class GameMain extends JPanel {
             return;
         }
         if (performLogin()) {
-            // Initialize and play backsound music in a loop
+            // Initialize and play background music in a loop
             SoundEffect.initGame();
             SoundEffect.BACKSOUND.loop();
             // Run GUI construction codes in Event-Dispatching thread for thread safety
@@ -336,9 +336,13 @@ public class GameMain extends JPanel {
 
     private static void performRegistration() {
         JTextField usernameField = new JTextField(10);
+        usernameField.setBackground(new Color(190, 170, 120));
         JTextField firstnameField = new JTextField(10);
+        firstnameField.setBackground(new Color(190, 170, 120));
         JTextField lastnameField = new JTextField(10);
+        lastnameField.setBackground(new Color(190, 170, 120));
         JPasswordField passwordField = new JPasswordField(10);
+        passwordField.setBackground(new Color(190, 170, 120));
         JRadioButton maleButton = new JRadioButton("Male");
         maleButton.setSelected(true);
         JRadioButton femaleButton = new JRadioButton("Female");
@@ -397,20 +401,32 @@ public class GameMain extends JPanel {
     private static boolean performLogin() {
         // Membuat panel custom untuk dialog login
         JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBackground(new Color(180, 255, 120)); // biru
         JPanel labels = new JPanel(new GridLayout(0, 1, 2, 2));
+        labels.setBackground(new Color(180, 255, 120));
         labels.add(new JLabel("Username", SwingConstants.RIGHT));
         labels.add(new JLabel("Password", SwingConstants.RIGHT));
         panel.add(labels, BorderLayout.WEST);
 
         JPanel controls = new JPanel(new GridLayout(0, 1, 2, 2));
+        controls.setBackground(new Color(180, 255, 120)); // kuning
         JTextField usernameField = new JTextField(10);
-        controls.add(usernameField);
+        usernameField.setBackground(new Color(190, 170, 120)); // abu-abu
         JPasswordField passwordField = new JPasswordField();
+        passwordField.setBackground(new Color(190, 170, 120)); // abu-abu
+        controls.add(usernameField);
         controls.add(passwordField);
         panel.add(controls, BorderLayout.CENTER);
 
+
         // Opsi tombol custom untuk dialog
         Object[] options = {"Login", "Register", "Cancel"};
+
+        // Atur warna tombol dan panel background dialog
+        UIManager.put("OptionPane.background", new Color(180, 255, 120)); // hijau muda
+        UIManager.put("Panel.background", new Color(180, 255, 120));
+        UIManager.put("Button.background", new Color(140, 238, 190)); // hijau terang
+        UIManager.put("Button.foreground", Color.BLACK);
 
         while (true) {
             // Menggunakan showOptionDialog agar bisa punya 3 tombol
