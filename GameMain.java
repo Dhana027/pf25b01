@@ -42,15 +42,34 @@ public class GameMain extends JPanel {
 
     private Image backgroundImage;
 
+    private void handleLogout() {
+        // Hentikan musik latar
+        SoundEffect.BACKSOUND.stop();
+
+        // Reset username yang login
+        loggedInUsername = null;
+
+        // Dapatkan frame saat ini dan hancurkan
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        if (frame != null) {
+            frame.dispose();
+        }
+
+        // Mulai ulang aplikasi dari awal (akan memunculkan dialog login)
+        main(null);
+    }
+    
     private void selectGameMode() {
-        Object[] modeOptions = {"Player vs Player", "Player vs Bot"};
+        Object[] modeOptions = {"Player vs Player", "Player vs Bot", "Logout"};
         int modeChoice = JOptionPane.showOptionDialog(
-                null, "Choose Game Mode:", "Mode",
+                this, // Menggunakan 'this' agar dialog muncul di tengah game frame
+                "Choose an option:", "Game Menu",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, modeOptions, modeOptions[0]);
 
-        if (modeChoice == JOptionPane.CLOSED_OPTION) {
-            System.exit(0);
+        if (modeChoice == 2 || modeChoice == JOptionPane.CLOSED_OPTION) { // 2 adalah indeks "Logout"
+            handleLogout();
+            return; // Hentikan eksekusi lebih lanjut
         }
 
         gameMode = (modeChoice == 0) ? 1 : 2;
@@ -60,7 +79,10 @@ public class GameMain extends JPanel {
             int difficultyChoice = JOptionPane.showOptionDialog(this, "Select Bot Difficulty", "Difficulty",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, difficultyOptions, difficultyOptions[1]);
 
-            if (difficultyChoice == -1) System.exit(0);
+            if (difficultyChoice == JOptionPane.CLOSED_OPTION) {
+                selectGameMode(); // Kembali ke menu utama jika di-cancel
+                return;
+            }
             difficultyLevel = difficultyChoice + 1; // 1, 2, or 3
         }
 
@@ -71,7 +93,8 @@ public class GameMain extends JPanel {
                 null, symbolOptions, symbolOptions[0]);
 
         if (symbolChoice == JOptionPane.CLOSED_OPTION) {
-            System.exit(0);
+            selectGameMode(); // Kembali ke menu utama
+            return; // Hentikan eksekusi metode ini
         }
 
         playerSeed = (symbolChoice == 0) ? Seed.CROSS : Seed.NOUGHT;
@@ -166,7 +189,7 @@ public class GameMain extends JPanel {
                         }
                     }
                 } else {
-                    updateStatistics(currentState);
+                    DatabaseManager.updateStatistics(currentState, playerSeed, loggedInUsername);
                     updateScore(currentState);
 
                     int response = JOptionPane.showOptionDialog(null,
@@ -175,7 +198,7 @@ public class GameMain extends JPanel {
                             JOptionPane.DEFAULT_OPTION,
                             JOptionPane.QUESTION_MESSAGE,
                             null,
-                            new String[]{"Play Again", "Quit"},
+                            new String[]{"Play Again", "Change Mode"},
                             "Play Again");
 
                     if (response == 0) {
@@ -216,7 +239,6 @@ public class GameMain extends JPanel {
 
         // Set up Game
         initGame();
-        newGame();
     }
 
     /**
@@ -233,15 +255,9 @@ public class GameMain extends JPanel {
      * Reset the game-board contents and the current-state, ready for new game
      */
     public void newGame() {
-        GameMain.this.selectGameMode();
-        resetBoardOnly();
-        board.newGame();
-
-        currentState = State.PLAYING;
-        currentPlayer = Seed.CROSS;
-
-        if (gameMode == 2 && playerSeed == Seed.NOUGHT) {
-            AImove();
+        selectGameMode();
+        if (loggedInUsername != null) {
+            resetBoardOnly();
         }
     }
 
@@ -284,6 +300,13 @@ public class GameMain extends JPanel {
 
     /** The entry "main" method */
     public static void main(String[] args) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "MySQL JDBC Driver not found!", "Driver Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            return;
+        }
         if (performLogin()) {
             // Initialize and play backsound music in a loop
             SoundEffect.initGame();
@@ -294,11 +317,13 @@ public class GameMain extends JPanel {
                 public void run() {
                     JFrame frame = new JFrame(TITLE);
                     // Set the content-pane of the JFrame to an instance of main JPanel
-                    frame.setContentPane(new GameMain()); // set main panel
+                    GameMain gamePanel = new GameMain();
+                    frame.setContentPane(gamePanel); // set main panel
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     frame.pack();                         // auto size
                     frame.setLocationRelativeTo(null);    // center the window
                     frame.setVisible(true);               // show the window
+                    gamePanel.newGame();
                 }
             });
 
@@ -309,47 +334,65 @@ public class GameMain extends JPanel {
         }
     }
 
+    private static void performRegistration() {
+        JTextField usernameField = new JTextField(10);
+        JTextField firstnameField = new JTextField(10);
+        JTextField lastnameField = new JTextField(10);
+        JPasswordField passwordField = new JPasswordField(10);
+        JRadioButton maleButton = new JRadioButton("Male");
+        maleButton.setSelected(true);
+        JRadioButton femaleButton = new JRadioButton("Female");
+        ButtonGroup sexGroup = new ButtonGroup();
+        sexGroup.add(maleButton);
+        sexGroup.add(femaleButton);
+        JPanel sexPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        sexPanel.add(maleButton);
+        sexPanel.add(femaleButton);
 
-    static String getPassword(String username) throws ClassNotFoundException {
-        String host, port, databaseName, userName, password;
-        String pass = "";
-        host = "mysql-bdc0fb9-sedanayoga-c1d0.b.aivencloud.com";
-        port = "18480";
-        databaseName = "defaultdb";
-        userName = "avnadmin";
-        password = "AVNS_sC5VSCXgbjts3LLEcoN";
-//        for (int i = 0; i < args.length - 1; i++) {
-//            switch (args[i].toLowerCase(Locale.ROOT)) {
-//                case "-host": host = args[++i]; break;
-//                case "-username": userName = args[++i]; break;
-//                case "-password": password = args[++i]; break;
-//                case "-database": databaseName = args[++i]; break;
-//                case "-port": port = args[++i]; break;
-//            }
-//        }
-        // JDBC allows to have nullable username and password
-        if (host == null || port == null || databaseName == null) {
-            System.out.println("Host, port, database information is required");
-            return "err";
-        }
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        try (final Connection connection =
-                     DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", userName, password);
-             final Statement statement = connection.createStatement();
-             final ResultSet resultSet = statement.executeQuery("SELECT password from gameuser where username='"+username+"'")) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.add(new JLabel("Username:"));
+        panel.add(usernameField);
+        panel.add(new JLabel("First Name:"));
+        panel.add(firstnameField);
+        panel.add(new JLabel("Last Name:"));
+        panel.add(lastnameField);
+        panel.add(new JLabel("Password:"));
+        panel.add(passwordField);
+        panel.add(new JLabel("Sex:"));
+        panel.add(sexPanel);
 
+        int result = JOptionPane.showConfirmDialog(null, panel, "Register",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-            while (resultSet.next()) {
-                //System.out.println("Username: " + resultSet.getString("username"));
-                pass = resultSet.getString("password");
+        if (result == JOptionPane.OK_OPTION) {
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+            String firstname = firstnameField.getText();
+            String lastname = lastnameField.getText();
+            String sex = maleButton.isSelected() ? "Male" : "Female";
+
+            if (username.isEmpty() || password.isEmpty() || firstname.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Username, Password, and First Name cannot be empty.", "Registration Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        } catch (SQLException e) {
-            System.out.println("Connection failure.");
-            e.printStackTrace();
-        }
-        return pass;
-    }
 
+            try {
+                if (DatabaseManager.usernameExists(username)) {
+                    JOptionPane.showMessageDialog(null, "Username already exists. Please choose another one.", "Registration Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    if (DatabaseManager.registerUser(username, password, firstname, lastname, sex)) {
+                        JOptionPane.showMessageDialog(null, "Registration successful! Please login.");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Registration failed. Please try again.", "Database Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Database error during registration.", "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+    }
 
     private static boolean performLogin() {
         // Membuat panel custom untuk dialog login
@@ -359,7 +402,6 @@ public class GameMain extends JPanel {
         labels.add(new JLabel("Password", SwingConstants.RIGHT));
         panel.add(labels, BorderLayout.WEST);
 
-
         JPanel controls = new JPanel(new GridLayout(0, 1, 2, 2));
         JTextField usernameField = new JTextField(10);
         controls.add(usernameField);
@@ -367,72 +409,41 @@ public class GameMain extends JPanel {
         controls.add(passwordField);
         panel.add(controls, BorderLayout.CENTER);
 
+        // Opsi tombol custom untuk dialog
+        Object[] options = {"Login", "Register", "Cancel"};
 
-        while (true) { // Loop sampai login berhasil atau dibatalkan
-            int result = JOptionPane.showConfirmDialog(null, panel, "Login",
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        while (true) {
+            // Menggunakan showOptionDialog agar bisa punya 3 tombol
+            int choice = JOptionPane.showOptionDialog(null, panel, "Login",
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+                    null, options, options[0]);
 
-
-            if (result == JOptionPane.OK_OPTION) {
+            if (choice == 0) { // Indeks 0: Tombol "Login"
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
-
-
                 try {
-                    String truePass = getPassword(username);
-                    if (!password.isEmpty() && password.equals(truePass)) {
-                        loggedInUsername = username; // Simpan username global
+                    String dbPassword = DatabaseManager.getPasswordFromDB(username);
+                    if (dbPassword != null && dbPassword.equals(password)) {
+                        loggedInUsername = username;
                         JOptionPane.showMessageDialog(null, "Login Success! Welcome, " + username + ".");
                         return true;
                     } else {
                         JOptionPane.showMessageDialog(null, "Wrong username or password.", "Login failed", JOptionPane.ERROR_MESSAGE);
-                        // Loop akan berlanjut
                     }
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null, "Connection to database failed.", "Connection Error", JOptionPane.ERROR_MESSAGE);
                     e.printStackTrace();
-                    return false; // Keluar jika ada error DB
+                    return false;
                 }
-            } else {
-                return false; // menekan Cancel atau menutup dialog
+            } else if (choice == 1) { // Indeks 1: Tombol "Register"
+                performRegistration();
+                // Setelah registrasi, loop berlanjut agar pengguna bisa login
+            } else { // Pilihan lainnya (Cancel atau tutup dialog)
+                return false;
             }
         }
     }
 
-    private void updateStatistics(State result) {
-        String host = "mysql-bdc0fb9-sedanayoga-c1d0.b.aivencloud.com";
-        String port = "18480";
-        String databaseName = "defaultdb";
-        String userName = "avnadmin";
-        String password = "AVNS_sC5VSCXgbjts3LLEcoN";
-
-        String fieldToUpdate = null;
-
-        if ((result == State.CROSS_WON && playerSeed == Seed.CROSS) ||
-                (result == State.NOUGHT_WON && playerSeed == Seed.NOUGHT)) {
-            fieldToUpdate = "won";
-        } else if ((result == State.CROSS_WON && playerSeed == Seed.NOUGHT) ||
-                (result == State.NOUGHT_WON && playerSeed == Seed.CROSS)) {
-            fieldToUpdate = "lose";
-        } else if (result == State.DRAW) {
-            fieldToUpdate = "draw";
-        }
-
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require",
-                userName, password);
-             Statement stmt = conn.createStatement()) {
-
-            if (fieldToUpdate != null) {
-                stmt.executeUpdate("UPDATE gameuser SET " + fieldToUpdate + " = " + fieldToUpdate + " + 1 WHERE username = '" + loggedInUsername + "'");
-            }
-
-            stmt.executeUpdate("UPDATE gameuser SET play = play + 1 WHERE username = '" + loggedInUsername + "'");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void updateScore(State result) {
         if (result == State.CROSS_WON) {
