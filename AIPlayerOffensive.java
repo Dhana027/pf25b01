@@ -27,7 +27,7 @@ public class AIPlayerOffensive extends AIPlayer {
         // Prioritas 1: Cari langkah untuk menang.
         int[] winningMove = findWinningMove(mySeed);
         if (winningMove != null) {
-            return winningMove; // Ambil kemenangan!
+            return winningMove; // Ambil kemenangan
         }
 
         // Prioritas 2: Jika tidak ada, ikuti daftar prioritas.

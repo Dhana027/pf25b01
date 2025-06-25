@@ -43,44 +43,44 @@ public class GameMain extends JPanel {
     private Image backgroundImage;
 
     private void handleLogout() {
-        // Hentikan musik latar
+        // Untu menghentikan backsound
         SoundEffect.BACKSOUND.stop();
 
-        // Reset username yang login
+        // Mereset username yang login
         loggedInUsername = null;
 
-        // Dapatkan frame saat ini dan hancurkan
+        // Menghapus frame yang ada
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
         if (frame != null) {
             frame.dispose();
         }
 
-        // Mulai ulang aplikasi dari awal (akan memunculkan dialog login)
+        // Untuk memulai aplikasi dari awal dan memunculkan tampilan login
         main(null);
     }
     
     private void selectGameMode() {
         Object[] modeOptions = {"Player vs Player", "Player vs Bot", "Logout"};
         int modeChoice = JOptionPane.showOptionDialog(
-                this, // Menggunakan 'this' agar dialog muncul di tengah game frame
+                this,
                 "Choose an option:", "Game Menu",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
                 null, modeOptions, modeOptions[0]);
 
-        if (modeChoice == 2 || modeChoice == JOptionPane.CLOSED_OPTION) { // 2 adalah indeks "Logout"
+        if (modeChoice == 2 || modeChoice == JOptionPane.CLOSED_OPTION) { // 2 merujuk pada "Logout"
             handleLogout();
-            return; // Hentikan eksekusi lebih lanjut
+            return;
         }
 
         gameMode = (modeChoice == 0) ? 1 : 2;
 
-        if (gameMode == 2) { // Jika Player vs Bot
+        if (gameMode == 2) { //Jika Player vs Bot
             Object[] difficultyOptions = {"Easy", "Medium", "Hard"};
             int difficultyChoice = JOptionPane.showOptionDialog(this, "Select Bot Difficulty", "Difficulty",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, difficultyOptions, difficultyOptions[1]);
 
             if (difficultyChoice == JOptionPane.CLOSED_OPTION) {
-                selectGameMode(); // Kembali ke menu utama jika di-cancel
+                selectGameMode(); //Kembali ke menu utama jika pemain mengcancel
                 return;
             }
             difficultyLevel = difficultyChoice + 1; // 1, 2, or 3
@@ -94,7 +94,7 @@ public class GameMain extends JPanel {
 
         if (symbolChoice == JOptionPane.CLOSED_OPTION) {
             selectGameMode(); // Kembali ke menu utama
-            return; // Hentikan eksekusi metode ini
+            return;
         }
 
         playerSeed = (symbolChoice == 0) ? Seed.CROSS : Seed.NOUGHT;
@@ -112,7 +112,7 @@ public class GameMain extends JPanel {
             default: currentAI = aiPlayerHard; break;
         }
 
-        currentAI.setSeed(aiSeed); // Beritahu AI bidak apa yang ia gunakan
+        currentAI.setSeed(aiSeed); //Memberitahu AI seed apa yang akan digunakan
         int[] move = currentAI.move();
 
         if (move != null) {
@@ -120,13 +120,21 @@ public class GameMain extends JPanel {
             playMoveSound();
         }
 
-        currentPlayer = playerSeed; // Kembalikan giliran ke pemain manusia
+        currentPlayer = playerSeed; //Mengembalikan giliran permainan ke player atau user
     }
 
     private void playMoveSound() {
-        if (currentState == State.PLAYING) SoundEffect.EAT_FOOD.play();
-        else if (currentState == State.DRAW) SoundEffect.SERI.play();
-        else SoundEffect.DIE.play();
+        if (currentState == State.PLAYING) {
+            if (aiSeed == Seed.CROSS) {
+                SoundEffect.EAT_FOOD.play(); // Suara untuk X
+            } else {
+                SoundEffect.EXPLODE.play();  // Suara untuk O
+            }
+        } else if (currentState == State.DRAW) {
+            SoundEffect.SERI.play();
+        } else {
+            SoundEffect.DIE.play();
+        }
     }
 
 
@@ -148,7 +156,7 @@ public class GameMain extends JPanel {
         // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
+            public void mouseClicked(MouseEvent e) {
                 int mouseX = e.getX();
                 int mouseY = e.getY();
                 // Get the row and column clicked
@@ -166,9 +174,9 @@ public class GameMain extends JPanel {
                         // Play appropriate sound clip
                         if (currentState == State.PLAYING) {
                             if (currentPlayer == Seed.CROSS) {
-                                SoundEffect.EAT_FOOD.play(); // Sound khusus untuk X
+                                SoundEffect.EAT_FOOD.play(); // Sound effect untuk X
                             } else {
-                                SoundEffect.EXPLODE.play(); // Sound khusus untuk O
+                                SoundEffect.EXPLODE.play(); // Sound effect untuk O
                             }
                         } else {
                             if (currentState == State.DRAW) {
@@ -184,7 +192,7 @@ public class GameMain extends JPanel {
                                 AImove();
                                 repaint();
                             });
-                            timer.setRepeats(false); // Pastikan timer hanya berjalan sekali
+                            timer.setRepeats(false); // Memastikan bahwa timer hanya berjalan sekali
                             timer.start();
                         }
                     }
@@ -202,16 +210,16 @@ public class GameMain extends JPanel {
                             "Play Again");
 
                     if (response == 0) {
-                        resetBoardOnly(); // main lagi, score tetap
+                        resetBoardOnly(); // main lagi dan score tetap sama
                     } else {
                         scoreX = 0;
                         scoreO = 0;
                         updateScoreLabel();
-                        newGame(); // reset game dan score
+                        newGame(); // mereset game dan score
                     }
                 }
                 // Refresh the drawing canvas
-                repaint();  // Callback paintComponent().
+                repaint();
             }
         });
 
@@ -226,13 +234,14 @@ public class GameMain extends JPanel {
 
         super.setLayout(new BorderLayout());
         scoreLabel = new JLabel("Score - X: 0 | O: 0");
+        scoreLabel.setForeground(Color.WHITE);
         scoreLabel.setFont(FONT_STATUS);
         scoreLabel.setBackground(Color.WHITE);
         scoreLabel.setOpaque(false);
         scoreLabel.setHorizontalAlignment(JLabel.CENTER);
         scoreLabel.setPreferredSize(new Dimension(300, 30));
         super.add(scoreLabel, BorderLayout.PAGE_START);
-        super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
+        super.add(statusBar, BorderLayout.PAGE_END);
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
         // account for statusBar in height
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
@@ -283,7 +292,7 @@ public class GameMain extends JPanel {
 
         // Print status-bar message
         if (currentState == State.PLAYING) {
-            statusBar.setForeground(Color.BLACK);
+            statusBar.setForeground(Color.WHITE);
             statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
         } else if (currentState == State.DRAW) {
             statusBar.setForeground(Color.RED);
@@ -399,7 +408,7 @@ public class GameMain extends JPanel {
     }
 
     private static boolean performLogin() {
-        // Membuat panel custom untuk dialog login
+        // Membuat panel custom untuk bagian login
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setBackground(new Color(180, 255, 120)); // biru
         JPanel labels = new JPanel(new GridLayout(0, 1, 2, 2));
@@ -419,22 +428,22 @@ public class GameMain extends JPanel {
         panel.add(controls, BorderLayout.CENTER);
 
 
-        // Opsi tombol custom untuk dialog
+        // Membuat pilihan untuk melakukan "Login", "Register", atau "Cancel"
         Object[] options = {"Login", "Register", "Cancel"};
 
-        // Atur warna tombol dan panel background dialog
+        // Mengatur warna button
         UIManager.put("OptionPane.background", new Color(180, 255, 120)); // hijau muda
         UIManager.put("Panel.background", new Color(180, 255, 120));
         UIManager.put("Button.background", new Color(140, 238, 190)); // hijau terang
         UIManager.put("Button.foreground", Color.BLACK);
 
         while (true) {
-            // Menggunakan showOptionDialog agar bisa punya 3 tombol
+            // Menggunakan showOptionDialog agar bisa mempunyai 3 button
             int choice = JOptionPane.showOptionDialog(null, panel, "Login",
                     JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
                     null, options, options[0]);
 
-            if (choice == 0) { // Indeks 0: Tombol "Login"
+            if (choice == 0) { // Indeks 0: button "Login"
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
                 try {
@@ -451,10 +460,10 @@ public class GameMain extends JPanel {
                     e.printStackTrace();
                     return false;
                 }
-            } else if (choice == 1) { // Indeks 1: Tombol "Register"
+            } else if (choice == 1) { // Indeks 1: button "Register"
                 performRegistration();
                 // Setelah registrasi, loop berlanjut agar pengguna bisa login
-            } else { // Pilihan lainnya (Cancel atau tutup dialog)
+            } else { // Kondisi untuk pilihan lainnya (Cancel atau menutup dialog)
                 return false;
             }
         }

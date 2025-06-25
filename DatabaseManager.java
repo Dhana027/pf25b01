@@ -58,7 +58,7 @@ public class DatabaseManager {
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
-            pstmt.setString(2, password); // Di aplikasi nyata, password harus di-hash!
+            pstmt.setString(2, password);
             pstmt.setString(3, firstname);
             pstmt.setString(4, lastname);
             pstmt.setString(5, sex);
@@ -82,11 +82,8 @@ public class DatabaseManager {
             fieldToUpdate = "draw";
         }
 
-        // Keluar jika tidak ada yang perlu diupdate (misal, game belum selesai)
         if (fieldToUpdate == null) return;
 
-        // Perhatikan: PreparedStatement tidak bisa digunakan untuk nama kolom dinamis seperti ini.
-        // String concatenation di sini bisa diterima karena nilai fieldToUpdate dikontrol oleh program, bukan input user.
         String sql = "UPDATE gameuser SET " + fieldToUpdate + " = " + fieldToUpdate + " + 1, play = play + 1 WHERE username = ?";
 
         try (Connection conn = getConnection();

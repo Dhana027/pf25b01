@@ -38,7 +38,6 @@ public class AIPlayerDefensiveHard extends AIPlayer {
             }
         }
 
-        // Seharusnya tidak pernah sampai ke baris ini.
         assert false : "No empty cell?!";
         return null;
     }
